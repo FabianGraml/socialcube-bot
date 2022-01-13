@@ -1,5 +1,4 @@
 import os
-
 from selenium import webdriver
 import time
 from services.botService import login, read_file, write_file, guess_word

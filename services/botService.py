@@ -45,7 +45,6 @@ def create_log(server, log_msg):
     log = " ".join(log_msg.splitlines())
     now = now.strftime("%d/%m/%Y, %H:%M:%S")
     logMsg = now + " ---> " + log
-    print(logMsg)
     data = {'logMsg': log, 'logDate': now}
     requests.post(server, json=data)
 
@@ -55,7 +54,7 @@ def guess_word(driver, words):
         logMsg = ""
         wordGuess = ""
         currentWord = 0
-        while not logMsg.startswith("Du hast"):
+        while not logMsg.startswith("Du hast") and not logMsg.__contains__("Wartezeit"):
             wordGuess = words[currentWord].replace("\n", "")
             words.pop(currentWord)
             currentWord += 1
@@ -67,15 +66,20 @@ def guess_word(driver, words):
             time.sleep(1)
             guessBtn = driver.find_element(By.CLASS_NAME, "btn-primary")
             guessBtn.click()
+            time.sleep(2)
+
             try:
+                # Log for not the right guess
                 logMsg = driver.find_element(By.CSS_SELECTOR, "#content_data > div.alert.alert-dismissable.alert-danger.animated.shake > p").text
             except NoSuchElementException:
                 try:
+                    # Log for success
                     logMsg = driver.find_element(By.CSS_SELECTOR, "#content_data > h2").text
-                    logMsg = "Gratulation! " + logMsg
                     create_log(SERVER, logMsg)
                 except NoSuchElementException:
+                    # Log for waiting time
                     logMsg = driver.find_element(By.CSS_SELECTOR, "#content_data > div.alert.alert-dismissable.alert-warning.animated.pulse").text
+                    logMsg = logMsg.replace("\n", "").replace("×", "")
 
             print("Word: " + wordGuess + ", " + logMsg)
         return logMsg
