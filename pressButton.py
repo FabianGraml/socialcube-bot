@@ -15,7 +15,7 @@ while True:
 
         logMsg = press_button(driver).text
 
-        create_log(SERVER, logMsg)
+        # create_log(SERVER, logMsg)
         driver.close()
         time.sleep(60*30)
 

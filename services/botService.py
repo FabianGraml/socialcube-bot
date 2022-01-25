@@ -76,6 +76,15 @@ def guess_word(driver, words):
         return logMsg
 
 
+def create_log(server, log_msg):
+    now = datetime.now()
+    log = " ".join(log_msg.splitlines())
+    now = now.strftime("%d/%m/%Y, %H:%M:%S")
+    logMsg = now + " ---> " + log
+    data = {'logMsg': log, 'logDate': now}
+    requests.post(server, json=data)
+
+
 def read_file(file_name):
     with open(file_name) as f:
         lines = f.readlines()
