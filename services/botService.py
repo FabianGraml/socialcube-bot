@@ -40,15 +40,6 @@ def press_button(driver):
     return logMsg
 
 
-def create_log(server, log_msg):
-    now = datetime.now()
-    log = " ".join(log_msg.splitlines())
-    now = now.strftime("%d/%m/%Y, %H:%M:%S")
-    logMsg = now + " ---> " + log
-    data = {'logMsg': log, 'logDate': now}
-    requests.post(server, json=data)
-
-
 def guess_word(driver, words):
     while True:
         logMsg = ""
@@ -75,7 +66,7 @@ def guess_word(driver, words):
                 try:
                     # Log for success
                     logMsg = driver.find_element(By.CSS_SELECTOR, "#content_data > h2").text
-                    create_log(SERVER, logMsg)
+                    # create_log(SERVER, logMsg)
                 except NoSuchElementException:
                     # Log for waiting time
                     logMsg = driver.find_element(By.CSS_SELECTOR, "#content_data > div.alert.alert-dismissable.alert-warning.animated.pulse").text
