@@ -2,9 +2,9 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 import time
 from datetime import datetime
-import requests
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 SERVER = os.getenv('SERVER')
@@ -18,71 +18,68 @@ def login(email, password, driver):
     time.sleep(1)
     password_input.send_keys(password)
     time.sleep(1)
-    loginBtn = driver.find_element(By.CLASS_NAME, "btn-primary")
-    loginBtn.click()
+    login_btn = driver.find_element(By.CLASS_NAME, "btn-primary")
+    login_btn.click()
 
 
 def press_button(driver):
     driver.get("https://www.socialcube.net/games/thebutton")
-    mainButton = driver.find_element(By.CLASS_NAME, "btn-primary")
-    mainButton.click()
+    main_btn = driver.find_element(By.CLASS_NAME, "btn-primary")
+    main_btn.click()
 
     try:
-        logMsg = driver.find_element(By.CSS_SELECTOR,
-                                  "#content_data > div.alert.alert-dismissable.alert-warning.animated.pulse > p")
+        log_msg = driver.find_element(By.CSS_SELECTOR,
+                                      "#content_data > div.alert.alert-dismissable.alert-warning.animated.pulse > p")
     except NoSuchElementException:
         try:
-            logMsg = driver.find_element(By.CSS_SELECTOR,
-                                      "#content_data > div.alert.alert-dismissable.alert-success.animated.tada")
+            log_msg = driver.find_element(By.CSS_SELECTOR,
+                                          "#content_data > div.alert.alert-dismissable.alert-success.animated.tada")
         except NoSuchElementException:
-            logMsg = "Something went wrong"
+            log_msg = "Something went wrong"
 
-    return logMsg
+    return log_msg
 
 
 def guess_word(driver, words):
     while True:
-        logMsg = ""
-        wordGuess = ""
-        currentWord = 0
-        while not logMsg.startswith("Du hast") and not logMsg.__contains__("Wartezeit"):
-            wordGuess = words[currentWord].replace("\n", "")
-            words.pop(currentWord)
-            currentWord += 1
+        log_msg = ""
+        current_word = 0
+        while not log_msg.startswith("Du hast") and "Wartezeit" not in log_msg:
+            word_guess = words[current_word].replace("\n", "")
+            words.pop(current_word)
+            current_word += 1
             driver.get("https://www.socialcube.net/games/wordguess")
             time.sleep(2)
-            wordGuesser = driver.find_element(By.CSS_SELECTOR,
-                                              "#content_data > div.row > div.col-md-8 > div > div.panel-body.content_box_content > form > fieldset > div.form-control-wrapper > input")
-            wordGuesser.send_keys(wordGuess)
+            word_guesser = driver.find_element(By.CSS_SELECTOR,
+                                               "#content_data > div.row > div.col-md-8 > div > "
+                                               "div.panel-body.content_box_content > form > fieldset > "
+                                               "div.form-control-wrapper > input")
+            word_guesser.send_keys(word_guess)
             time.sleep(1)
-            guessBtn = driver.find_element(By.CLASS_NAME, "btn-primary")
-            guessBtn.click()
+            guess_btn = driver.find_element(By.CLASS_NAME, "btn-primary")
+            guess_btn.click()
             time.sleep(2)
 
             try:
-                # Log for not the right guess
-                logMsg = driver.find_element(By.CSS_SELECTOR, "#content_data > div.alert.alert-dismissable.alert-danger.animated.shake > p").text
+                log_msg = driver.find_element(By.CSS_SELECTOR, "#content_data > div.alert.alert-dismissable.alert"
+                                                               "-danger.animated.shake > p").text
             except NoSuchElementException:
                 try:
-                    # Log for success
-                    logMsg = driver.find_element(By.CSS_SELECTOR, "#content_data > h2").text
-                    # create_log(SERVER, logMsg)
+                    log_msg = driver.find_element(By.CSS_SELECTOR, "#content_data > h2").text
                 except NoSuchElementException:
-                    # Log for waiting time
-                    logMsg = driver.find_element(By.CSS_SELECTOR, "#content_data > div.alert.alert-dismissable.alert-warning.animated.pulse").text
-                    logMsg = logMsg.replace("\n", "").replace("×", "")
+                    log_msg = driver.find_element(By.CSS_SELECTOR, "#content_data > div.alert.alert-dismissable.alert"
+                                                                   "-warning.animated.pulse").text
+                    log_msg = log_msg.replace("\n", "").replace("×", "")
 
-            print("Word: " + wordGuess + ", " + logMsg)
-        return logMsg
+            print("Word: " + word_guess + ", " + log_msg)
+        return log_msg
 
 
-def create_log(server, log_msg):
+def create_log(log_msg):
     now = datetime.now()
     log = " ".join(log_msg.splitlines())
     now = now.strftime("%d/%m/%Y, %H:%M:%S")
-    logMsg = now + " ---> " + log
-    data = {'logMsg': log, 'logDate': now}
-    requests.post(server, json=data)
+    write_file("log.txt", "[" + now + "]" + log)
 
 
 def read_file(file_name):
@@ -94,5 +91,3 @@ def read_file(file_name):
 def write_file(file_name, data):
     with open(file_name, 'w') as f:
         f.write("".join(data))
-
-
